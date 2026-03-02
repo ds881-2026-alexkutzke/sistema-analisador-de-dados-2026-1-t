@@ -1,0 +1,1 @@
+# sistema-analisador-de-dados-2026-1-n
