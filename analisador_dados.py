@@ -1,13 +1,9 @@
 class AnalisadorDados:
     def __init__(self):
-        self.historico = []
+        self.dados = []
 
-    def limpar_dados(self, dados_brutos):
-        return [d for d in dados_brutos if d is not None]
+    def carregar_dados(self, dados_brutos):
+        self.dados = dados_brutos
 
-    def processar_lista_aninhada(self, dados):
-        # TODO: Implementar logica para achatar a lista e somar os valores
+    def processar(self):
         pass
-
-    def exibir_resultado(self, resultado):
-        print(f"Resultado do processamento: {resultado}")

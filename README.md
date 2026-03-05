@@ -1,174 +1,222 @@
-# Prática 3: O Módulo Central e a Resolução de Conflitos Complexos
+# Prática 3: Integração Contínua e Commits Atômicos vs. Monolíticos
 
-Este repositório contém o código-base para a terceira etapa da prática de versionamento. O objetivo é demonstrar os impactos da falta de coordenação entre equipes, a dificuldade de revisar "commits monstros" e a resolução de conflitos lógicos no mesmo arquivo.
+Este repositório contém o código-base para a terceira etapa da prática de versionamento. O objetivo é contrastar a cultura DevOps de pequenos commits frequentes com a prática de grandes entregas espaçadas, evidenciando o impacto na rastreabilidade de bugs e na resolução de conflitos.
 
 ## 1. Código-Base Inicial
 
-O repositório possui a branch `main` com o arquivo `analisador_dados.py` contendo a seguinte estrutura inicial:
+O repositório possui a branch `main` com o arquivo `analisador_dados.py` contendo a seguinte estrutura básica:
 
 ```python
 class AnalisadorDados:
     def __init__(self):
-        self.historico = []
+        self.dados = []
 
-    def limpar_dados(self, dados_brutos):
-        return [d for d in dados_brutos if d is not None]
+    def carregar_dados(self, dados_brutos):
+        self.dados = dados_brutos
 
-    def processar_lista_aninhada(self, dados):
-        # TODO: Implementar logica para achatar a lista e somar os valores
+    def processar(self):
         pass
-
-    def exibir_resultado(self, resultado):
-        print(f"Resultado do processamento: {resultado}")
 
 ```
 
 ## 2. Preparação do Ambiente Local
 
-A turma será dividida em dois grupos (Grupo A e Grupo B). Todos os alunos devem clonar o repositório e acessar o diretório:
+Divida-se em dois grupos (A e B). Ambos devem clonar o repositório e criar suas respectivas branches a partir da `main`.
 
 ```bash
-# Clonar o repositório
 git clone <URL_DO_REPOSITORIO>
-
-# Acessar a pasta do projeto
 cd <NOME_DA_PASTA>
 
 ```
 
-## 3. Execução das Tarefas (Branches Paralelas)
+## 3. Execução das Tarefas
 
-Cada grupo desenvolverá uma solução diferente para o mesmo problema, no mesmo arquivo, sem comunicação prévia.
+O Grupo A simulará um fluxo ágil com commits atômicos. O Grupo B simulará um desenvolvimento prolongado com um único commit final ("Big Bang").
 
-### Grupo A: Implementação Recursiva
+### Grupo A: Abordagem Ágil (Commits Atômicos)
 
-**Objetivo:** Criar um método recursivo no início do arquivo e atualizar o método de processamento.
+**Objetivo:** Implementar as etapas de processamento dividindo as responsabilidades em commits lógicos e isolados.
 
-**Passo 1:** Criar a branch isolada.
+**Passo 1:** Criar a branch de trabalho.
 
 ```bash
-git checkout -b feat/calculo-recursivo
+git checkout -b feat/processamento-agil
 
 ```
 
-**Passo 2:** Alterar o arquivo `analisador_dados.py`. Inserir o método `_calcular_rec` logo abaixo da declaração da classe e atualizar o método `processar_lista_aninhada`.
+**Passo 2 (Commit 1 - Funcionalidade Base):** Substitua todo o código de `analisador_dados.py` pelo bloco abaixo e faça o commit.
 
 ```python
 class AnalisadorDados:
-    def _calcular_rec(self, lista):
-        total = 0
-        for item in lista:
-            if isinstance(item, list):
-                total += self._calcular_rec(item)
-            else:
-                total += item
-        return total
-
     def __init__(self):
-        self.historico = []
+        self.dados = []
 
-    def limpar_dados(self, dados_brutos):
-        return [d for d in dados_brutos if d is not None]
+    def carregar_dados(self, dados_brutos):
+        self.dados = dados_brutos
 
-    def processar_lista_aninhada(self, dados):
-        dados_limpos = self.limpar_dados(dados)
-        return self._calcular_rec(dados_limpos)
-
-    def exibir_resultado(self, resultado):
-        print(f"Resultado do processamento: {resultado}")
+    def processar(self):
+        soma = sum(self.dados)
+        return soma
 
 ```
-
-**Passo 3:** Registrar e enviar as alterações.
 
 ```bash
 git add analisador_dados.py
-git commit -m "feat: implementa solucao recursiva para calculo de dados aninhados"
-git push origin feat/calculo-recursivo
+git commit -m "feat: adiciona calculo de soma no processamento principal"
 
 ```
 
-*(Após o push, o Grupo A deve abrir o Pull Request no GitHub e o professor fará o merge imediatamente).*
+**Passo 3 (Commit 2 - Introdução de Regra de Negócio com Bug):** Substitua todo o código de `analisador_dados.py` pelo bloco abaixo. Um bug intencional foi inserido na limpeza de dados.
 
-### Grupo B: Implementação Iterativa
+```python
+class AnalisadorDados:
+    def __init__(self):
+        self.dados = []
 
-**Objetivo:** Criar um método iterativo no final do arquivo e atualizar o mesmo método de processamento.
+    def carregar_dados(self, dados_brutos):
+        self.dados = dados_brutos
 
-**Passo 1:** A partir da `main` original, criar a branch isolada.
+    def limpar_dados(self):
+        # Bug intencional: remove números negativos em vez de apenas nulos
+        self.dados = [d for d in self.dados if d and d > 0]
+
+    def processar(self):
+        self.limpar_dados()
+        soma = sum(self.dados)
+        return soma
+
+```
+
+```bash
+git add analisador_dados.py
+git commit -m "feat: implementa limpeza de dados nulos antes do calculo"
+
+```
+
+**Passo 4 (Commit 3 - Refatoração):** Substitua todo o código de `analisador_dados.py` pelo bloco abaixo para adicionar o relatório.
+
+```python
+class AnalisadorDados:
+    def __init__(self):
+        self.dados = []
+
+    def carregar_dados(self, dados_brutos):
+        self.dados = dados_brutos
+
+    def limpar_dados(self):
+        # Bug intencional: remove números negativos em vez de apenas nulos
+        self.dados = [d for d in self.dados if d and d > 0]
+
+    def processar(self):
+        self.limpar_dados()
+        soma = sum(self.dados)
+        return soma
+
+    def exibir_relatorio(self):
+        resultado = self.processar()
+        print(f"--- Relatório de Processamento ---")
+        print(f"Total calculado: {resultado}")
+
+```
+
+```bash
+git add analisador_dados.py
+git commit -m "feat: cria formatacao de saida para o relatorio final"
+
+```
+
+**Passo 5:** Envie para o remoto e abra o Pull Request para a `main` (aprovar e realizar o merge imediatamente).
+
+```bash
+git push origin feat/processamento-agil
+
+```
+
+### Grupo B: Abordagem Monolítica (Commit "Big Bang")
+
+**Objetivo:** Implementar múltiplas funcionalidades complexas (log, conversão de tipos, ordenação) trabalhando por muito tempo sem integrar com a branch principal.
+
+**Passo 1:** Certifique-se de estar no commit inicial da `main` (antes das alterações do Grupo A) e crie a branch.
 
 ```bash
 git checkout main
-git pull origin main
-git checkout -b feat/calculo-iterativo
+git pull origin main # Apenas se ainda não tiver feito o merge do Grupo A
+git checkout <HASH_DO_COMMIT_INICIAL> # Opcional, para garantir o ponto de partida
+git checkout -b feat/processamento-completo
 
 ```
 
-**Passo 2:** Alterar o arquivo `analisador_dados.py`. Inserir o método `_calcular_iter` no final da classe e atualizar o método `processar_lista_aninhada`.
+**Passo 2:** Substitua todo o código do arquivo `analisador_dados.py` pelo bloco abaixo. Isso representa dias de trabalho modificando a estrutura da classe inteira de uma vez.
 
 ```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 class AnalisadorDados:
-    def __init__(self):
-        self.historico = []
+    def __init__(self, ignorar_erros=False):
+        self._dados_internos = []
+        self.ignorar_erros = ignorar_erros
+        logging.info("Analisador inicializado.")
 
-    def limpar_dados(self, dados_brutos):
-        return [d for d in dados_brutos if d is not None]
+    def carregar_dados(self, array_dados):
+        if not isinstance(array_dados, list):
+            raise ValueError("Os dados devem ser uma lista")
+        self._dados_internos = array_dados
+        logging.info(f"{len(array_dados)} registros carregados.")
 
-    def processar_lista_aninhada(self, dados):
-        dados_limpos = self.limpar_dados(dados)
-        return self._calcular_iter(dados_limpos)
+    def ordenar_dados(self):
+        self._dados_internos.sort()
 
-    def exibir_resultado(self, resultado):
-        print(f"Resultado do processamento: {resultado}")
+    def converter_textos(self):
+        temp = []
+        for d in self._dados_internos:
+            try:
+                temp.append(float(d))
+            except (ValueError, TypeError):
+                if not self.ignorar_erros:
+                    raise
+        self._dados_internos = temp
 
-    def _calcular_iter(self, lista):
-        total = 0
-        pilha = list(lista)
-        while pilha:
-            item = pilha.pop()
-            if isinstance(item, list):
-                pilha.extend(item)
-            else:
-                total += item
+    def processar(self):
+        self.converter_textos()
+        self.ordenar_dados()
+        total = sum(self._dados_internos)
+        logging.info(f"Processamento concluído. Total: {total}")
         return total
 
 ```
 
-**Passo 3:** Registrar e enviar as alterações.
+**Passo 3:** Realize um único commit contendo todas as alterações estruturais e envie para o remoto.
 
 ```bash
 git add analisador_dados.py
-git commit -m "feat: adiciona algoritmo iterativo base em pilha"
-git push origin feat/calculo-iterativo
+git commit -m "Implementa funcionalidades de log, conversao, ordenacao e refatora a classe toda"
+git push origin feat/processamento-completo
 
 ```
 
-*(Após o push, o Grupo B deve abrir o Pull Request no GitHub. Ocorrerá um conflito imediato).*
+## 4. Análise de Impacto (O Problema)
 
-## 4. O Conflito e a Análise
+### Cenário 1: Reversão Rápida (Rollback)
 
-Quando o Grupo B tentar atualizar sua branch local com as alterações já aprovadas do Grupo A na `main`, o Git acusará um conflito.
+A equipe de QA identificou que o sistema está falhando ao processar números negativos. A falha está no código do **Grupo A**.
+
+* **Ação:** O Grupo A deve utilizar o histórico (`git log`) para identificar que o bug foi introduzido no Commit 2 ("implementa limpeza de dados nulos...").
+* **Resolução:** Como o commit foi atômico, basta isolar e reverter apenas ele, sem perder a funcionalidade de cálculo (Commit 1) e o relatório (Commit 3).
 
 ```bash
-# Comando para puxar as atualizações da main para a branch atual do Grupo B
-git pull origin main
+# O grupo A deve encontrar o hash do commit 2 com git log e executar:
+git revert <HASH_DO_COMMIT_2>
+git push origin feat/processamento-agil
 
 ```
 
-*Saída esperada: `CONFLICT (content): Merge conflict in analisador_dados.py*`
+* *Reflexão: E se o Grupo B tivesse introduzido o erro? Reverter o commit único significaria desfazer semanas de trabalho válidas apenas para corrigir uma linha.*
 
-Ao abrir o arquivo no editor, o bloco em conflito será exibido desta forma:
+### Cenário 2: Integration Hell
 
-```python
-<<<<<<< HEAD
-    def processar_lista_aninhada(self, dados):
-        dados_limpos = self.limpar_dados(dados)
-        return self._calcular_iter(dados_limpos)
-=======
-    def processar_lista_aninhada(self, dados):
-        dados_limpos = self.limpar_dados(dados)
-        return self._calcular_rec(dados_limpos)
->>>>>>> main
+O **Grupo B** agora tentará abrir um Pull Request da sua branch `feat/processamento-completo` para a `main`.
 
-```
-
-A resolução exigirá que os desenvolvedores leiam o código inserido no topo (pelo Grupo A) e no final (pelo Grupo B), conversem para decidir qual algoritmo será mantido em produção, apaguem as marcações do Git (`<<<<<<<`, `=======`, `>>>>>>>`), apaguem o código redundante e realizem um novo commit de correção.
+* **Ação:** Observe a interface do GitHub ao tentar criar o Pull Request.
+* **Resultado:** Ocorrerá um conflito estrutural massivo. Como o Grupo B não realizou atualizações incrementais e alterou partes fundamentais da classe (mudando `self.dados` para `self._dados_internos`, alterando o `__init__`, etc.) que o Grupo A já havia modificado, o arquivo estará bloqueado para merge automático. A resolução exigirá reescrever a classe quase do zero, mesclando as regras de negócio de ambos os grupos manualmente.
